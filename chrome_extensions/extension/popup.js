@@ -1,5 +1,8 @@
 const button = document.getElementById("slider");
 const slider_text = document.getElementById("isToggle");
+const summatinoDiv = document.getElementById("after_summation");
+var summationpage = false;
+
 
 chrome.storage.local.get("enabled", (data) => {
   button.textContent = data.enabled ? "Turn Off" : "Turn On";
@@ -7,17 +10,20 @@ chrome.storage.local.get("enabled", (data) => {
 
 button.addEventListener("click", () => {
   
+  if(!summationpage) {
+    summatinoDiv.style.display = 'block';
+    slider_text.textContent = "On";
+    summationpage = true;
+  }else {
+    summatinoDiv.style.display = 'none';
+    slider_text.textContent = "Off";
+    summationpage = false;
+  }
+
   chrome.storage.local.get("enabled", (data) => {
     const newState = !data.enabled;
-    const summatinoDiv = document.getElementById("after_summation")
-    if(data.enabled) {
-      summatinoDiv.style.display = 'block';
-    }else {
-      summatinoDiv.style.display = 'none';
-    }
+    
     chrome.storage.local.set({ enabled: newState }, () => {
-      slider_text.textContent = newState ? "Off" : "On";
-      button.textContent = newState ? "Turn Off" : "Turn On";
       //chrome.runtime.sendMessage({ toggle: newState });
     });
   });
@@ -112,9 +118,8 @@ messageForm.addEventListener('submit', (e) => {
 });
 
 SizeButton.addEventListener('click',() => {
-  document.body.style.width = '150%';
-  document.body.style.height = '90vh';
-  document.body.style.fontSize = '1.5rem';
+  document.body.style.width = '500px';
+  document.body.style.height = '10px';
 });
 
 chrome.runtime.onMessage.addListener((msg) => {
