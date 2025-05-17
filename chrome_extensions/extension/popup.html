@@ -97,32 +97,98 @@
           border-radius: 4px;
           width: 200px;
       }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      input:checked + .slider {
+        background-color: #2196F3;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .2s;
+        transition: .2s;
+      }
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+      .slider.round {
+        border-radius: 34px;
+      }
+      .slider.round:before {
+        border-radius: 50%;
+      }
+      #top_menu_h3, #isToggle{
+        display: inline-block;
+        height: 34px;
+        width: 100px;
+      }
+      .top_menu{
+        margin: 1px;
+        padding: 10px;
+        height: 60px;
+      }
+      #after_summation{
+        display: none;
+      }
     </style>
     
   </head>
   
   <body>
-    <h3>Extension Toggle</h3>
-    <button id="toggle">Turn On</button>
+    <div class="top_menu">
+      <h3 id="top_menu_h3" >Extension Toggle</h3>
+      <h2 id="isToggle">Off</h2>
+      <label class="switch">
+        <input id="slider" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    
+    <div class="before_summation">
+    </div>
 
-    <h1>system</h1>
-    
-    <div class="controls">
-        <input type="text" id="nameInput" placeholder="이름을 입력하세요" value="사용자">
+    <div id="after_summation">
+      <div id="messageContainer"></div>
+
+      <form id="messageForm">
+          <input type="text" id="messageInput" placeholder="메시지를 입력하세요...">
+          <button type="submit">transport</button>
+      </form>
+      <button id="changeSize">change Size</button>
     </div>
-    
-    <div id="messageContainer"></div>
-    
-    <form id="messageForm">
-        <input type="text" id="messageInput" placeholder="메시지를 입력하세요...">
-        <button type="submit">transport</button>
-    </form>
-    
-    <div class="controls">
-        <button id="clearButton">delete all messages</button>
-        <button id="sampleButton">add example</button>
-    </div>
-    <button id="changeSize">big size</button>
+
     <script src="popup.js"></script>
   </body>
 </html>

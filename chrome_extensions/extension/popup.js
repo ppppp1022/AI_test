@@ -1,15 +1,24 @@
-const button = document.getElementById("toggle");
+const button = document.getElementById("slider");
+const slider_text = document.getElementById("isToggle");
 
 chrome.storage.local.get("enabled", (data) => {
   button.textContent = data.enabled ? "Turn Off" : "Turn On";
 }); 
 
 button.addEventListener("click", () => {
+  
   chrome.storage.local.get("enabled", (data) => {
     const newState = !data.enabled;
+    const summatinoDiv = document.getElementById("after_summation")
+    if(data.enabled) {
+      summatinoDiv.style.display = 'block';
+    }else {
+      summatinoDiv.style.display = 'none';
+    }
     chrome.storage.local.set({ enabled: newState }, () => {
+      slider_text.textContent = newState ? "Off" : "On";
       button.textContent = newState ? "Turn Off" : "Turn On";
-      chrome.runtime.sendMessage({ toggle: newState });
+      //chrome.runtime.sendMessage({ toggle: newState });
     });
   });
 });
@@ -19,10 +28,7 @@ let messages = [];
 const messageContainer = document.getElementById('messageContainer');
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
-const nameInput = document.getElementById('nameInput');
-const clearButton = document.getElementById('clearButton');
-const sampleButton = document.getElementById('sampleButton');
-const bigSizeButton = document.getElementById('changeSize');
+const SizeButton = document.getElementById('changeSize');
 
 // 현재 시간 포맷팅 함수
 function formatTimestamp() {
@@ -105,13 +111,7 @@ messageForm.addEventListener('submit', (e) => {
     }
 });
 
-// 모든 메시지 지우기
-clearButton.addEventListener('click', () => {
-    messages = [];
-    displayMessages();
-});
-
-bigSizeButton.addEventListener('click',() => {
+SizeButton.addEventListener('click',() => {
   document.body.style.width = '150%';
   document.body.style.height = '90vh';
   document.body.style.fontSize = '1.5rem';
@@ -119,6 +119,6 @@ bigSizeButton.addEventListener('click',() => {
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "chunk") {
-    addMessage("Python", msg.data);
+    addMessage(msg.from, msg.data);
   }
 });
