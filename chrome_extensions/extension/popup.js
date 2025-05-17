@@ -2,7 +2,7 @@ const button = document.getElementById("toggle");
 
 chrome.storage.local.get("enabled", (data) => {
   button.textContent = data.enabled ? "Turn Off" : "Turn On";
-});
+}); 
 
 button.addEventListener("click", () => {
   chrome.storage.local.get("enabled", (data) => {

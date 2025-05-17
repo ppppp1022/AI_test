@@ -1,4 +1,5 @@
 *.log
 *.zip
+*.txt
 
 chrome_extensions/native/host.json

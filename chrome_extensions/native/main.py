@@ -98,7 +98,7 @@ def crawl_news_article(url):
         # 선택자로 본문 요소 찾기
         article_element = soup.select_one(target_selector)
 
-        if article_element:
+        if article_element: 
             # 요소에서 텍스트 추출 (하위 태그의 텍스트도 포함)
             # 불필요한 요소(예: 광고, 기자 정보 끝부분 등)는 추가적인 처리가 필요할 수 있습니다.
             # 여기서는 간단히 모든 텍스트를 가져옵니다.
