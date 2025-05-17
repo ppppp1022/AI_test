@@ -1,7 +1,0 @@
-2025-05-17 19:49:18,129 [INFO] Native host script started.
-2025-05-17 19:49:18,129 [INFO] 0.8.5
-2025-05-17 19:49:38,530 [INFO] Message received: {"url":"chrome://newtab/"}
-2025-05-17 19:49:38,530 [INFO] URL checked: chrome://newtab/
-2025-05-17 19:49:39,298 [INFO] Message received: {"url":"https://www.youtube.com/"}
-2025-05-17 19:49:39,299 [INFO] URL checked: https://www.youtube.com/
-2025-05-17 19:49:39,314 [INFO] Notification sent: Youtube에 접속했습니다
