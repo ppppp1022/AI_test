@@ -42,13 +42,15 @@ function formatTimestamp() {
 function addMessage(name, message, timestamp = formatTimestamp()) {
   const newMessage = { name, message, timestamp };
 
-  chrome.runtime.sendMessage({
+  if(name === "You")
+  {
+    chrome.runtime.sendMessage({
     type: "user_input",
     prompt: message,
     sender: name,
     timestamp: timestamp
-  });
-
+    });
+  }
   messages.push(newMessage);
   displayMessages();
 }
@@ -95,7 +97,7 @@ messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const message = messageInput.value.trim();
-    const name = nameInput.value.trim() || '사용자';
+    const name = 'You';
     
     if (message) {
         addMessage(name, message);
