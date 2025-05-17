@@ -5,11 +5,13 @@ chrome.storage.local.get("enabled", (data) => {
 });
 
 button.addEventListener("click", () => {
+  var summationDiv = document.getElementById('summation_part');
   chrome.storage.local.get("enabled", (data) => {
     const newState = !data.enabled;
     chrome.storage.local.set({ enabled: newState }, () => {
       button.textContent = newState ? "Turn Off" : "Turn On";
       chrome.runtime.sendMessage({ toggle: newState });
+      summationDiv.textContent = "oh"
     });
   });
 });
