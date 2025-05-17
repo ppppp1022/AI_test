@@ -18,9 +18,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case "user_input":
       if(message.prompt){
-        port.onMessage.addListener((message)=>{
-          chrome.runtime.sendMessage({type: "user_input", prompt:message.prompt});
-        });
+        port.postMessage({type: "user_input", prompt: message.prompt});
       }
       break;
   }
