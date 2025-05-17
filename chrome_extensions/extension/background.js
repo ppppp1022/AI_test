@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     port = null;
   }
 
-  if ((message.type === "user_input" || message.type === "url") && port) {
+  if ((message.type === "user_input" || message.type === "url" || message.type == "disscus") && port) {
     port.postMessage(message);
   }
 

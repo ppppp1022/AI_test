@@ -149,7 +149,7 @@ discuss_simul_model = genai.GenerativeModel(
         이때, 각 문장은 세 문장 이내로 답하며 JSON schema로 답할 것.:{{\
         "A1": <A가 첫 번째로 말할 말>, "B1": <B가 A1 다음으로 말할 말>,\
         "A2": <A가 B1 다음으로 말할 말>, "B2": <B가 A2 다음으로 말할 말>,\
-        "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>,\
+        "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>\
         }}',
 )
 discuss_simul = discuss_simul_model.start_chat(history=[])
@@ -168,10 +168,6 @@ while True:
     if msg_type == "user_input":
         prompt = msg.get("prompt", "")
         logging.info(f"User input received: {prompt}")
-
-        user_querie = prompt
-        ai_response = chat_session.send_message(user_querie)
-        send_response({"type":"chunk", "data": ai_response.text})
         continue
 
     elif msg_type == "url":
@@ -190,10 +186,16 @@ while True:
         continue
 
     elif msg_type == "disscus":
+        logging.info(f'Disscus simmulation started')
         if len(_article_history) <= 2:
             logging.info(f'Article History is too short. len={len(_article_history)}')
             send_response({"type": "chunk", "from": "AI", "data": "Too short history. Please visit more articles."})
-        discuss_result = json.loads(discuss_simul.send_message(_article_history).text)
+            continue    
+
+        discuss_result = discuss_simul.send_message(_article_history)
+        logging.info(f'Disscus simmulation generated')
+        logging.info(discuss_result)
+        discuss_result = json.loads(discuss_result.text)
         logging.info(f'Disscus simmulation generated')
         logging.info(discuss_result)
         send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})

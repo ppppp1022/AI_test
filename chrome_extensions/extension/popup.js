@@ -24,7 +24,7 @@ button.addEventListener("click", () => {
     const newState = !data.enabled;
     
     chrome.storage.local.set({ enabled: newState }, () => {
-      //chrome.runtime.sendMessage({ toggle: newState });
+    chrome.runtime.sendMessage({ toggle: newState });
     });
   });
 });
@@ -118,8 +118,7 @@ messageForm.addEventListener('submit', (e) => {
 });
 
 SizeButton.addEventListener('click',() => {
-  document.body.style.width = '500px';
-  document.body.style.height = '10px';
+  chrome.runtime.sendMessage({type: "disscus"});
 });
 
 chrome.runtime.onMessage.addListener((msg) => {
