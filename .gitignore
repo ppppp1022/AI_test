@@ -1,3 +1,3 @@
 *.log
 
-#chrome_extensions/native/host.json
+chrome_extensions/native/host.json
