@@ -1,5 +1,5 @@
 let port = null;
-
+ 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.toggle === true) {
     port = chrome.runtime.connectNative("com.example.nativehost");
