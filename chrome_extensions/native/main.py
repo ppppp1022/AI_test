@@ -140,7 +140,7 @@ model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
 logging.info(f'Selected gemini model: {_MODEL}')
 chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
 biase_analyzer = biase_analyzer_model.start_chat(history=[])
-discuss_simul = genai.GenerativeModel(
+discuss_simul_model = genai.GenerativeModel(
     _MODEL,
     system_instruction='한 사람이 이때까지 읽은 기사의 analysis history를 추가적인 입력으로 읽고, \
         해당 뉴스 기사 요약 결과의 편향성 스펙트럼을 분석해서 \
@@ -151,8 +151,9 @@ discuss_simul = genai.GenerativeModel(
         "A2": <A가 B1 다음으로 말할 말>, "B2": <B가 A2 다음으로 말할 말>,\
         "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>,\
         }}',
-    temperature=0.3
-).start_chat(history=[])
+)
+discuss_simul = discuss_simul_model.start_chat(history=[])
+logging.info(f'model all loaded')
 
 _user_bias = []
 _article_history = []
@@ -189,6 +190,9 @@ while True:
         continue
 
     elif msg_type == "disscus":
+        if len(_article_history) <= 2:
+            logging.info(f'Article History is too short. len={len(_article_history)}')
+            send_response({"type": "chunk", "from": "AI", "data": "Too short history. Please visit more articles."})
         discuss_result = json.loads(discuss_simul.send_message(_article_history).text)
         logging.info(f'Disscus simmulation generated')
         logging.info(discuss_result)
