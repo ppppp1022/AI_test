@@ -7,15 +7,25 @@ import requests
 from bs4 import BeautifulSoup
 
 import google.generativeai as genai
+from IPython.display import Markdown
+import textwrap
 
 _available_webpage = ['www.mk.co.kr', 'www.joongang.co.kr', 'www.hani.co.kr', 'www.donga.com']
+_MODEL = 'gemini-2.0-flash'
+_GEMINI_PREPROMT = "당신은 유치원 선생님입니다. 사용자는 유치원생입니다. 쉽고 친절하게 이야기하되 3문장 이내로 짧게 얘기하세요."
 
-# 🔧 로그 설정
+# 로그 설정
 logging.basicConfig(
     filename='native_host.log',
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s'
 )
+
+def to_markdown(text):
+    text = text.replace("•", "  *")
+    return Markdown(textwrap.indent(text, "> ", predicate=lambda _: True))
+
+genai.configure(api_key='AIzaSyBrHMVvqui_squRfTgU-_kF2AcoAYXlzmc')
 
 def send_notification(message):
     try:
@@ -116,6 +126,8 @@ def crawl_news_article(url):
 
 # 메인 루프
 logging.info('Native host script started.')
+model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
+logging.info(f'Selected gemini model: {_MODEL}')
 
 while True:
     msg = read_message()
@@ -127,7 +139,11 @@ while True:
     if msg_type == "user_input":
         prompt = msg.get("prompt", "")
         logging.info(f"User input received: {prompt}")
-        send_response({"type":"chunk", "data": prompt})
+
+        chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
+        user_querie = prompt
+        ai_response = chat_session.send_message(user_querie)
+        send_response({"type":"chunk", "data": ai_response.text})
         continue
 
     elif msg_type == "url":
