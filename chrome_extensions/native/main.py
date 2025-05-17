@@ -126,7 +126,7 @@ def crawl_news_article(url):
 
 # 메인 루프
 logging.info('Native host script started.')
-biase_analyzer_model = genai.GenerativeModel(
+bias_analyzer_model = genai.GenerativeModel(
     _MODEL,
     system_instruction = '웹 페이지를 크롤링 한 결과가 주어지면 \
         해당 크롤링 결과의 편향성 스펙트럼을 분석해서 \
@@ -139,7 +139,7 @@ biase_analyzer_model = genai.GenerativeModel(
 model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
 logging.info(f'Selected gemini model: {_MODEL}')
 chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
-biase_analyzer = biase_analyzer_model.start_chat(history=[])
+bias_analyzer = bias_analyzer_model.start_chat(history=[])
 discuss_simul_model = genai.GenerativeModel(
     _MODEL,
     system_instruction='한 사람이 이때까지 읽은 기사의 analysis history를 추가적인 입력으로 읽고, \
@@ -178,12 +178,14 @@ while True:
         if len(splited_url) > 2 and splited_url[2] in _available_webpage:
             if splited_url[-1].isdigit():
                 crawled = crawl_news_article(url)
-                analyze_result = biase_analyzer.send_message(crawled)
+                analyze_result = bias_analyzer.send_message(crawled)
                 analyze_result = json.loads(analyze_result.text)
                 _user_bias.append(analyze_result["편향도"])
                 _article_history.append(analyze_result["근거"])
-                logging.info(f'Average of user biase {sum(_user_bias) / len(_user_bias)}')
+                logging.info(f'Average of user bias {sum(_user_bias) / len(_user_bias)}')
                 logging.info(f'Bias is {analyze_result["편향도"]}, reason is {analyze_result["근거"]}')
+        if abs(sum(_user_bias) / len(_user_bias) ) > 3:
+            send_notification("흠... 다른 성향의 기사도 찾아보는 건 어떤가요?")
         continue
 
     elif msg_type == "disscus":
@@ -194,10 +196,7 @@ while True:
             continue    
 
         discuss_result = discuss_simul.send_message(_article_history)
-        logging.info(f'Disscus simmulation generated')
-        logging.info(discuss_result)
         discuss_result = json.loads(discuss_result.text)
-        logging.info(f'Disscus simmulation generated')
         logging.info(discuss_result)
         send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
         send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
