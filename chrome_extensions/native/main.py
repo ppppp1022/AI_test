@@ -117,6 +117,7 @@ while True:
         logging.info('No message or terminated. Exiting loop.')
         break
     url = msg.get('url', '')
+    logging.info(f'{msg}')
     logging.info(f'URL checked: {url}')
     splited_url = url.split('/')
     if splited_url[2] in _available_webpage:

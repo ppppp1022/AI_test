@@ -13,7 +13,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.toggle === false && port) {
     port.disconnect();
     port = null;
-  }else if (message.type === "newMessage") {
+  }
+  if (message.toggle === true && message.type === "newMessage") {
     // storage가 활성화되어 있고 port가 존재하는 경우에만 전송
     chrome.storage.local.get("enabled", (data) => {
       if (data.enabled && port) {
