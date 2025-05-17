@@ -190,6 +190,8 @@ while True:
 
     elif msg_type == "disscus":
         discuss_result = json.loads(discuss_simul.send_message(_article_history).text)
+        logging.info(f'Disscus simmulation generated')
+        logging.info(discuss_result)
         send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
         send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
         send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A2"]})
