@@ -132,7 +132,7 @@ biase_analyzer_model = genai.GenerativeModel(
         해당 크롤링 결과의 편향성 스펙트럼을 분석해서 \
         -5에 가까울 수록 극좌, 5에 가까울 수록 극우로 판단 하여 \
         JSON schema로 답할 것.:{{\
-        "편향도": <-5~5 사이의 숫자>, "근거": <한 문장 이내>\
+        "편향도": <-5~5 사이의 숫자>, "근거": <세 문장 이내>\
         }}',
     generation_config={"response_mime_type": "application/json"}
 )
@@ -140,8 +140,22 @@ model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
 logging.info(f'Selected gemini model: {_MODEL}')
 chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
 biase_analyzer = biase_analyzer_model.start_chat(history=[])
+discuss_simul = genai.GenerativeModel(
+    _MODEL,
+    system_instruction='한 사람이 이때까지 읽은 기사의 analysis history를 추가적인 입력으로 읽고, \
+        해당 뉴스 기사 요약 결과의 편향성 스펙트럼을 분석해서 \
+        -5에 가까울 수록 극좌, 5에 가까울 수록 극우로 판단 하여 \
+        점수가 0 미만인 A, 점수가 0 초과인 B의 토론을 시연할 것. \
+        이때, 각 문장은 세 문장 이내로 답하며 JSON schema로 답할 것.:{{\
+        "A1": <A가 첫 번째로 말할 말>, "B1": <B가 A1 다음으로 말할 말>,\
+        "A2": <A가 B1 다음으로 말할 말>, "B2": <B가 A2 다음으로 말할 말>,\
+        "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>,\
+        }}',
+    temperature=0.3
+).start_chat(history=[])
 
 _user_bias = []
+_article_history = []
 
 while True:
     msg = read_message()
@@ -169,9 +183,19 @@ while True:
                 analyze_result = biase_analyzer.send_message(crawled)
                 analyze_result = json.loads(analyze_result.text)
                 _user_bias.append(analyze_result["편향도"])
+                _article_history.append(analyze_result["근거"])
                 logging.info(f'Average of user biase {sum(_user_bias) / len(_user_bias)}')
                 logging.info(f'Bias is {analyze_result["편향도"]}, reason is {analyze_result["근거"]}')
         continue
+
+    elif msg_type == "disscus":
+        discuss_result = json.loads(discuss_simul.send_message(_article_history).text)
+        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
+        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
+        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A2"]})
+        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["A2"]})
+        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A3"]})
+        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B3"]})
 
     else:
         logging.warning(f"Unknown message type: {msg_type}")
