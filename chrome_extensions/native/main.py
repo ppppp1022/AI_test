@@ -126,8 +126,22 @@ def crawl_news_article(url):
 
 # 메인 루프
 logging.info('Native host script started.')
+biase_analyzer_model = genai.GenerativeModel(
+    _MODEL,
+    system_instruction = '웹 페이지를 크롤링 한 결과가 주어지면 \
+        해당 크롤링 결과의 편향성 스펙트럼을 분석해서 \
+        -5에 가까울 수록 극좌, 5에 가까울 수록 극우로 판단 하여 \
+        JSON schema로 답할 것.:{{\
+        "편향도": <-5~5 사이의 숫자>, "근거": <한 문장 이내>\
+        }}',
+    generation_config={"response_mime_type": "application/json"}
+)
 model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
 logging.info(f'Selected gemini model: {_MODEL}')
+chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
+biase_analyzer = biase_analyzer_model.start_chat(history=[])
+
+_user_bias = []
 
 while True:
     msg = read_message()
@@ -140,7 +154,6 @@ while True:
         prompt = msg.get("prompt", "")
         logging.info(f"User input received: {prompt}")
 
-        chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
         user_querie = prompt
         ai_response = chat_session.send_message(user_querie)
         send_response({"type":"chunk", "data": ai_response.text})
@@ -153,8 +166,11 @@ while True:
         if len(splited_url) > 2 and splited_url[2] in _available_webpage:
             if splited_url[-1].isdigit():
                 crawled = crawl_news_article(url)
-                # with open('crawled text.txt', 'w') as f:
-                    # f.write(crawled)
+                analyze_result = biase_analyzer.send_message(crawled)
+                analyze_result = json.loads(analyze_result.text)
+                _user_bias.append(analyze_result["편향도"])
+                logging.info(f'Average of user biase {sum(_user_bias) / len(_user_bias)}')
+                logging.info(f'Bias is {analyze_result["편향도"]}, reason is {analyze_result["근거"]}')
         continue
 
     else:
