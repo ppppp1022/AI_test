@@ -1,7 +1,0 @@
-{
-  "name": "com.example.nativehost",
-  "description": "Python Native Host",
-  "path": "__REPLACED_BY_INSTALL_SCRIPT__",
-  "type": "stdio",
-  "allowed_origins": ["chrome-extension://   <<< CHANGE HERE FOR EXTENSION ID >>>   /"]
-}
