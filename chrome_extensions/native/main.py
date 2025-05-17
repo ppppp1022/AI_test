@@ -80,7 +80,7 @@ def crawl_news_article(url):
 
         if not target_selector:
             logging.warning(f'{url} is not available url.')
-            return f'지원하지 않는 신문사 URL입니다: {url}'
+            return ''
 
         logging.info(f'"{news_site_name}" attempt to extract article body (selector: {target_selector})')
 
@@ -103,12 +103,12 @@ def crawl_news_article(url):
 
     except requests.exceptions.RequestException as e:
         logging.error(f'An error occurred while retrieving URL: {e}')
-        return f'An error occurred while retrieving URL:{e}'
+        return ''
     except Exception as e:
         logging.error(f'An error occurred while crawling: {e}')
-        return f'크롤링 중 오류 발생: {e}'
+        return ''
 
-# 🔁 메인 루프
+# 메인 루프
 logging.info('Native host script started.')
 
 while True:
