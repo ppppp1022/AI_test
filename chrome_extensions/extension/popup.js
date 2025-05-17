@@ -44,7 +44,7 @@ function addMessage(name, message, timestamp = formatTimestamp()) {
     const newMessage = { name, message, timestamp };
     chrome.runtime.sendMessage({
       type: "user_input",
-      prompt: newMessage
+      prompt: newMessage.message
     });
     // 메시지 배열에 추가
     messages.push(newMessage);
