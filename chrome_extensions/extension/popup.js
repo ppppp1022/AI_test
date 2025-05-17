@@ -9,7 +9,7 @@ button.addEventListener("click", () => {
     const newState = !data.enabled;
     chrome.storage.local.set({ enabled: newState }, () => {
       button.textContent = newState ? "Turn Off" : "Turn On";
-      //chrome.runtime.sendMessage({ toggle: newState });
+      chrome.runtime.sendMessage({ toggle: newState });
     });
   });
 });
@@ -121,4 +121,12 @@ bigSizeButton.addEventListener('click',() => {
   document.body.style.width = '150%';
   document.body.style.height = '90vh';
   document.body.style.fontSize = '1.5rem';
+});
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "add_message") {
+    const name = msg.name || "Python";
+    const message = msg.message || "";
+    addMessage(name, message);
+  }
 });
