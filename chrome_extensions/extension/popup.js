@@ -9,7 +9,10 @@ button.addEventListener("click", () => {
     const newState = !data.enabled;
     chrome.storage.local.set({ enabled: newState }, () => {
       button.textContent = newState ? "Turn Off" : "Turn On";
-      chrome.runtime.sendMessage({ toggle: newState });
+      chrome.runtime.sendMessage({ 
+        type: "init",
+        toggle: newState 
+      });
     });
   });
 });
@@ -42,7 +45,10 @@ function formatTimestamp() {
 function addMessage(name, message, timestamp = formatTimestamp()) {
     // 새 메시지 객체 생성
     const newMessage = { name, message, timestamp };
-    
+    chrome.runtime.sendMessage({
+      type: "user_input",
+      prompt: newMessage.message
+    });
     // 메시지 배열에 추가
     messages.push(newMessage);
     
