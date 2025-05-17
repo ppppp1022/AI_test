@@ -3,7 +3,7 @@
 
   
 
-이 프로그램은 Chrome 확장 프로그램과 Google Gemini API를 연동하여 에코 챔버(Echo Chamber)현상을 해결하기 위한 프로그램입니다.
+이 프로그램은 Chrome 확장 프로그램과 Google Gemini API를 연동하여 에코 챔버(Echo Chamber)현상을 해결하기 위한 프로그램입니다. 
 
   
 
