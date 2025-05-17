@@ -151,6 +151,7 @@ discuss_simul_model = genai.GenerativeModel(
         "A2": <A가 B1 다음으로 말할 말>, "B2": <B가 A2 다음으로 말할 말>,\
         "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>\
         }}',
+    generation_config={"response_mime_type": "application/json"}
 )
 discuss_simul = discuss_simul_model.start_chat(history=[])
 logging.info(f'model all loaded')
