@@ -24,17 +24,6 @@ def send_notification(message):
     except Exception as e:
         logging.error(f'Notification error: {e}')
 
-def send_response(data):
-    try:
-        response_str = json.dumps(data)
-        response_bytes = response_str.encode("utf-8")
-        sys.stdout.buffer.write(len(response_bytes).to_bytes(4, byteorder="little"))
-        sys.stdout.buffer.write(response_bytes)
-        sys.stdout.buffer.flush()
-        logging.info(f'Sent response: {data}')
-    except Exception as e:
-        logging.exception("Error sending response")
-
 def read_message():
     try:
         raw_length = sys.stdin.buffer.read(4)
@@ -127,23 +116,17 @@ while True:
     if msg is None:
         logging.info('No message or terminated. Exiting loop.')
         break
-
     url = msg.get('url', '')
     logging.info(f'URL checked: {url}')
-    _splited_url = url.split('/')
-
-    if _splited_url[2] in _available_webpage:
-        if _splited_url[-1].isdigit():
+    splited_url = url.split('/')
+    if splited_url[2] in _available_webpage:
+        if splited_url[-1].isdigit():
             logging.info(f'Crawling available for {url}')
             crawled = crawl_news_article(url)
             with open('crawled text.txt', 'w') as f:
                 f.write(crawled)
-            send_response({
-                "type": "add_message",
-                "name": "Python",
-                "message": f"{_splited_url[2]} 기사 수집 완료"
-            })
         else:
             logging.info(f'{url} is not article.')
+
 
 logging.info('Native host script exited.')
