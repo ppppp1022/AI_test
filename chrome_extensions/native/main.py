@@ -12,7 +12,6 @@ import textwrap
 
 _available_webpage = ['www.mk.co.kr', 'www.joongang.co.kr', 'www.hani.co.kr', 'www.donga.com']
 _MODEL = 'gemini-2.0-flash'
-_GEMINI_PREPROMT = "당신은 유치원 선생님입니다. 사용자는 유치원생입니다. 쉽고 친절하게 이야기하되 3문장 이내로 짧게 얘기하세요."
 
 # 로그 설정
 logging.basicConfig(
@@ -136,9 +135,7 @@ bias_analyzer_model = genai.GenerativeModel(
         }}',
     generation_config={"response_mime_type": "application/json"}
 )
-model = genai.GenerativeModel(_MODEL, system_instruction = _GEMINI_PREPROMT)
 logging.info(f'Selected gemini model: {_MODEL}')
-chat_session = model.start_chat(history=[]) #ChatSession 객체 반환
 bias_analyzer = bias_analyzer_model.start_chat(history=[])
 discuss_simul_model = genai.GenerativeModel(
     _MODEL,
