@@ -157,53 +157,55 @@ _user_bias = []
 _article_history = []
 
 while True:
-    msg = read_message()
-    if msg is None:
-        break
+    try:
+        msg = read_message()
+        if msg is None:
+            break
 
-    msg_type = msg.get("type")
+        msg_type = msg.get("type")
 
-    if msg_type == "user_input":
-        prompt = msg.get("prompt", "")
-        logging.info(f"User input received: {prompt}")
-        continue
+        if msg_type == "user_input":
+            prompt = msg.get("prompt", "")
+            logging.info(f"User input received: {prompt}")
+            continue
 
-    elif msg_type == "url":
-        url = msg.get("url", "")
-        logging.info(f"URL checked: {url}")
-        splited_url = url.split('/')
-        if len(splited_url) > 2 and splited_url[2] in _available_webpage:
-            if splited_url[-1].isdigit():
-                crawled = crawl_news_article(url)
-                analyze_result = bias_analyzer.send_message(crawled)
-                analyze_result = json.loads(analyze_result.text)
-                _user_bias.append(analyze_result["편향도"])
-                _article_history.append(analyze_result["근거"])
-                logging.info(f'Average of user bias {sum(_user_bias) / len(_user_bias)}')
-                logging.info(f'Bias is {analyze_result["편향도"]}, reason is {analyze_result["근거"]}')
-        if abs(sum(_user_bias) / len(_user_bias) ) > 3:
-            send_notification("흠... 다른 성향의 기사도 찾아보는 건 어떤가요?")
-        continue
+        elif msg_type == "url":
+            url = msg.get("url", "")
+            logging.info(f"URL checked: {url}")
+            splited_url = url.split('/')
+            if len(splited_url) > 2 and splited_url[2] in _available_webpage:
+                if splited_url[-1].isdigit():
+                    crawled = crawl_news_article(url)
+                    analyze_result = bias_analyzer.send_message(crawled)
+                    analyze_result = json.loads(analyze_result.text)
+                    _user_bias.append(analyze_result["편향도"])
+                    _article_history.append(analyze_result["근거"])
+                    logging.info(f'Average of user bias {sum(_user_bias) / len(_user_bias)}')
+                    logging.info(f'Bias is {analyze_result["편향도"]}, reason is {analyze_result["근거"]}')
+            if abs(sum(_user_bias) / len(_user_bias) ) > 3:
+                send_notification("흠... 다른 성향의 기사도 찾아보는 건 어떤가요?")
+            continue
 
-    elif msg_type == "disscus":
-        logging.info(f'Disscus simmulation started')
-        if len(_article_history) <= 2:
-            logging.info(f'Article History is too short. len={len(_article_history)}')
-            send_response({"type": "chunk", "from": "AI", "data": "Too short history. Please visit more articles."})
-            continue    
+        elif msg_type == "disscus":
+            logging.info(f'Disscus simmulation started')
+            if len(_article_history) <= 2:
+                logging.info(f'Article History is too short. len={len(_article_history)}')
+                send_response({"type": "chunk", "from": "AI", "data": "Too short history. Please visit more articles."})
+                continue    
 
-        discuss_result = discuss_simul.send_message(_article_history)
-        discuss_result = json.loads(discuss_result.text)
-        logging.info(discuss_result)
-        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
-        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
-        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A2"]})
-        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["A2"]})
-        send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A3"]})
-        send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B3"]})
+            discuss_result = discuss_simul.send_message(_article_history)
+            discuss_result = json.loads(discuss_result.text)
+            logging.info(discuss_result)
+            send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
+            send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
+            send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A2"]})
+            send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["A2"]})
+            send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A3"]})
+            send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B3"]})
 
-    else:
-        logging.warning(f"Unknown message type: {msg_type}")
-
+        else:
+            logging.warning(f"Unknown message type: {msg_type}")
+    except Exception as e:
+        logging.error(f'An error occurred: {e}')
 
 logging.info('Native host script exited.')
