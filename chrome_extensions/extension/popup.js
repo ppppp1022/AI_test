@@ -11,7 +11,6 @@ button.addEventListener("click", () => {
     chrome.storage.local.set({ enabled: newState }, () => {
       button.textContent = newState ? "Turn Off" : "Turn On";
       chrome.runtime.sendMessage({ toggle: newState });
-      summationDiv.textContent = "oh"
     });
   });
 });
