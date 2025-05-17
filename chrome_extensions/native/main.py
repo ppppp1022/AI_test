@@ -38,6 +38,12 @@ def read_message():
         logging.error(f'Error reading message: {e}')
         return None
 
+def send_response(data):
+    response = json.dumps(data).encode('utf-8')
+    sys.stdout.buffer.write(len(response).to_bytes(4, byteorder='little'))
+    sys.stdout.buffer.write(response)
+    sys.stdout.buffer.flush()
+    logging.info(f"Sent: {data}")
 
 def crawl_news_article(url):
     '''
@@ -114,20 +120,29 @@ logging.info('Native host script started.')
 while True:
     msg = read_message()
     if msg is None:
-        logging.info('No message or terminated. Exiting loop.')
         break
-    url = msg.get('url', '')
-    logging.info(f'{msg}')
-    logging.info(f'URL checked: {url}')
-    splited_url = url.split('/')
-    if splited_url[2] in _available_webpage:
-        if splited_url[-1].isdigit():
-            logging.info(f'Crawling available for {url}')
-            crawled = crawl_news_article(url)
-            with open('crawled text.txt', 'w') as f:
-                f.write(crawled)
-        else:
-            logging.info(f'{url} is not article.')
+
+    msg_type = msg.get("type")
+
+    if msg_type == "user_input":
+        prompt = msg.get("prompt", "")
+        logging.info(f"User input received: {prompt}")
+        send_response({"type":"chunk", "data": prompt})
+        continue
+
+    elif msg_type == "url":
+        url = msg.get("url", "")
+        logging.info(f"URL checked: {url}")
+        splited_url = url.split('/')
+        if len(splited_url) > 2 and splited_url[2] in _available_webpage:
+            if splited_url[-1].isdigit():
+                crawled = crawl_news_article(url)
+                # with open('crawled text.txt', 'w') as f:
+                    # f.write(crawled)
+        continue
+
+    else:
+        logging.warning(f"Unknown message type: {msg_type}")
 
 
 logging.info('Native host script exited.')

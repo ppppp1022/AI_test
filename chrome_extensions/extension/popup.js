@@ -40,19 +40,18 @@ function formatTimestamp() {
 
 // 메시지 추가 함수
 function addMessage(name, message, timestamp = formatTimestamp()) {
-    // 새 메시지 객체 생성
-    const newMessage = { name, message, timestamp };
-    chrome.runtime.sendMessage({
-      type: "user_input",
-      prompt: newMessage.message
-    });
-    // 메시지 배열에 추가
-    messages.push(newMessage);
-    
-    // UI에 메시지 표시
-    displayMessages();
-}
+  const newMessage = { name, message, timestamp };
 
+  chrome.runtime.sendMessage({
+    type: "user_input",
+    prompt: message,
+    sender: name,
+    timestamp: timestamp
+  });
+
+  messages.push(newMessage);
+  displayMessages();
+}
 // 메시지 렌더링 함수
 function displayMessages() {
     // 기존 메시지 컨테이너 내용 지우기
@@ -110,18 +109,14 @@ clearButton.addEventListener('click', () => {
     displayMessages();
 });
 
-// 예제 메시지 추가
-sampleButton.addEventListener('click', () => {
-    addMessage('dd');
-    addMessage('김철수', '네, 안녕하세요. 오늘 날씨가 좋네요.', '2025-05-18 14:32');
-    addMessage('이영희', '맞아요. 정말 화창한 날이에요!', '2025-05-18 14:35');
-});
-
-// 초기 예제 메시지 표시
-addMessage('시스템', '메시지 표시 시스템에 오신 것을 환영합니다.', '2025-05-18 14:00');
-
 bigSizeButton.addEventListener('click',() => {
   document.body.style.width = '150%';
   document.body.style.height = '90vh';
   document.body.style.fontSize = '1.5rem';
+});
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "chunk") {
+    addMessage("Python", msg.data);
+  }
 });
