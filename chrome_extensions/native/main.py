@@ -137,16 +137,32 @@ bias_analyzer_model = genai.GenerativeModel(
 )
 logging.info(f'Selected gemini model: {_MODEL}')
 bias_analyzer = bias_analyzer_model.start_chat(history=[])
+article_analyzer = genai.GenerativeModel(
+    _MODEL,
+    system_instruction='어떤 한 사람이 읽은 기사의 웹 크롤링 결과와\
+    그 기사를 읽은 사람의 요청이 주어지면 웹 크롤링 결과를 바탕으로 요청에 답할 것.\
+    이때, JSON schema로 답할 것.:{{\
+    "결과": <요청에 대한 대답으로 세 문장 이내>\
+    }}',
+    generation_config={"response_mime_type": "application/json"}
+).start_chat(history=[])
+
 discuss_simul_model = genai.GenerativeModel(
     _MODEL,
-    system_instruction='한 사람이 이때까지 읽은 기사의 analysis history를 추가적인 입력으로 읽고, \
+    system_instruction='만약 한 사람이 이때까지 읽은 기사의 analysis history를 추가적인 입력으로 읽었으면, \
         해당 뉴스 기사 요약 결과의 편향성 스펙트럼을 분석해서 \
         -5에 가까울 수록 극좌, 5에 가까울 수록 극우로 판단 하여 \
-        점수가 0 미만인 A, 점수가 0 초과인 B의 토론을 시연할 것. \
-        이때, 각 문장은 세 문장 이내로 답하며 JSON schema로 답할 것.:{{\
+        점수가 -1 미만인 A, 점수가 1 초과인 B의 토론을 시연할 것. \
+        토론 주제는 한 가지로 정하여 토론할 것.\
+        이때, 각 문장은 세 문장 이내로 답하며 다음의 JSON schema로 답할 것.:{{\
         "A1": <A가 첫 번째로 말할 말>, "B1": <B가 A1 다음으로 말할 말>,\
         "A2": <A가 B1 다음으로 말할 말>, "B2": <B가 A2 다음으로 말할 말>,\
         "A3": <A가 B2 다음으로 말할 말>, "B3": <B가 A3 다음으로 말할 말>\
+        }} \
+        만약 한 사람의 읽은 기사가 아닌 개인의 의견이 입력으로 들어왔을 경우\
+        그 의견에 대해서 A의 입장과 B의 입장을 답할 것.\
+        이때, 각 문장은 세 문장 이내로 답하며 다음의 JSON schema로 답할 것.:{{\
+        "A1": <A가 의견에 대해 말할 말>, "B1": <B가 의견에 대해 말할 말>\
         }}',
     generation_config={"response_mime_type": "application/json"}
 )
@@ -155,6 +171,7 @@ logging.info(f'model all loaded')
 
 _user_bias = []
 _article_history = []
+_discussion = False
 
 while True:
     try:
@@ -167,6 +184,16 @@ while True:
         if msg_type == "user_input":
             prompt = msg.get("prompt", "")
             logging.info(f"User input received: {prompt}")
+            if _discussion:
+                discuss_result = discuss_simul.send_message(prompt)
+                discuss_result = json.loads(discuss_result.text)
+                logging.info(discuss_result)
+                send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
+                send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
+            else:
+                article_result = json.loads(article_analyzer.send_message((_article_history[-1], prompt)).text)
+                logging.info(article_result)
+                send_response({"type": "chunk", "from": "인물 A", "data": article_result["결과"]})
             continue
 
         elif msg_type == "url":
@@ -191,8 +218,9 @@ while True:
             if len(_article_history) <= 2:
                 logging.info(f'Article History is too short. len={len(_article_history)}')
                 send_response({"type": "chunk", "from": "AI", "data": "Too short history. Please visit more articles."})
-                continue    
+                continue
 
+            _discussion = True
             discuss_result = discuss_simul.send_message(_article_history)
             discuss_result = json.loads(discuss_result.text)
             logging.info(discuss_result)
