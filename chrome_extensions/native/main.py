@@ -226,7 +226,7 @@ while True:
             logging.info(discuss_result)
             send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
             send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B1"]})
-            send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A2"]})
+            send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A1"]})
             send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["A2"]})
             send_response({"type": "chunk", "from": "인물 A", "data": discuss_result["A3"]})
             send_response({"type": "chunk", "from": "인물 B", "data": discuss_result["B3"]})
